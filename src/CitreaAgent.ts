@@ -1,12 +1,13 @@
-import { transferS } from './tools/citrea/CITREAOperations.js';
+import { transferCITREA } from './tools/citrea/CITREAOperations.js';
 import { transferErc20, burnErc20 } from './tools/citrea/erc20Operations.js';
-import { getSBalance } from './tools/citrea/getCITREABalance.js';
+import { getCITREABalance } from './tools/citrea/getCITREABalance.js';
 import { getErc20Balance } from './tools/citrea/getErc20Balance.js';
 import { deployContract } from './tools/citrea/deployContract.js';
 import { initializeClient, setCurrentPrivateKey } from './core/client.js';
 import { createAgent } from './agent.js';
 import { applyFirewall } from './aifirewall/index.js';
-import type { AgentExecutor } from 'langchain/agents';
+import type { Runnable } from '@langchain/core/runnables';
+import type { BaseChatMessageHistory } from '@langchain/core/chat_history';
 import type { modelMapping } from './utils/models.js';
 
 export interface CitreaAgentConfig {
@@ -15,6 +16,10 @@ export interface CitreaAgentConfig {
   model: keyof typeof modelMapping;
   openAiApiKey?: string;
   anthropicApiKey?: string;
+  personalityPrompt?: string;
+  memory?: {
+    getMessageHistory?: (sessionId: string) => BaseChatMessageHistory;
+  };
 }
 
 export interface TransferCITREAParams {
@@ -47,10 +52,12 @@ export interface DeployContractParams {
 export class CitreaAgent {
   private privateKey: string;
   private rpcUrl: string;
-  private agentExecutor: AgentExecutor;
+  private agentExecutor: Runnable;
   private model: keyof typeof modelMapping;
   private openAiApiKey?: string;
   private anthropicApiKey?: string;
+  private defaultSessionId: string;
+  private getMessageHistory?: (sessionId: string) => BaseChatMessageHistory;
 
   constructor(config: CitreaAgentConfig) {
     this.privateKey = config.privateKey;
@@ -58,6 +65,8 @@ export class CitreaAgent {
     this.model = config.model;
     this.openAiApiKey = config.openAiApiKey;
     this.anthropicApiKey = config.anthropicApiKey;
+    this.getMessageHistory = config.memory?.getMessageHistory;
+    this.defaultSessionId = `citrea-agent-${Math.random().toString(36).slice(2)}-${Date.now()}`;
 
     if (!this.privateKey) {
       throw new Error('Private key is required.');
@@ -75,6 +84,10 @@ export class CitreaAgent {
       this.model,
       this.openAiApiKey,
       this.anthropicApiKey,
+      { 
+        getMessageHistory: this.getMessageHistory,
+        personalityPrompt: config.personalityPrompt
+      },
     );
   }
 
@@ -86,19 +99,17 @@ export class CitreaAgent {
     };
   }
 
-  async execute(input: string) {
-   
-    
-
+  async execute(input: string, options?: { sessionId?: string }) {
     const sanitizedInput = await applyFirewall(input, {
       model: this.model,
       openAiApiKey: this.openAiApiKey,
       anthropicApiKey: this.anthropicApiKey,
     });
 
-    const response = await this.agentExecutor.invoke({
-      input: sanitizedInput,
-    });
+    const response = await this.agentExecutor.invoke(
+      { input: sanitizedInput },
+      { configurable: { sessionId: options?.sessionId ?? this.defaultSessionId } },
+    );
 
     setCurrentPrivateKey(this.privateKey);
 
@@ -107,7 +118,7 @@ export class CitreaAgent {
 
   async transferCITREA(params: TransferCITREAParams) {
     setCurrentPrivateKey(this.privateKey);
-    return await transferS(params);
+    return await transferCITREA(params);
   }
 
   async transferErc20(params: TransferErc20Params) {
@@ -122,7 +133,7 @@ export class CitreaAgent {
 
   async getCITREABalance(params?: { walletAddress?: string }) {
     setCurrentPrivateKey(this.privateKey);
-    return await getSBalance(params || {});
+    return await getCITREABalance(params || {});
   }
 
   async getErc20Balance(params: GetErc20BalanceParams) {
