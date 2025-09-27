@@ -1,7 +1,7 @@
 import { ethers, parseEther } from "ethers";
 import { getSigner, getProvider, getAgentAddress } from "../../core/client";
 
-export const transferS = async ({
+export const transferCITREA = async ({
   toAddress,
   amount
 }: {
@@ -61,12 +61,12 @@ export const transferS = async ({
       const totalRequiredFormatted = ethers.formatEther(totalRequired);
       const gasCostFormatted = ethers.formatEther(gasCost);
       throw new Error(
-        `Insufficient cBTC balance. Current: ${currentBalanceFormatted} cBTC, ` +
-        `Required: ${totalRequiredFormatted} cBTC (${amount} cBTC + ${gasCostFormatted} cBTC gas)`
+        `Insufficient CITREA balance. Current: ${currentBalanceFormatted} CITREA, ` +
+        `Required: ${totalRequiredFormatted} CITREA (${amount} CITREA + ${gasCostFormatted} CITREA gas)`
       );
     }
 
-    console.log(`Transferring ${amount} cBTC to ${toAddress}...`);
+    console.log(`Transferring ${amount} CITREA to ${toAddress}...`);
     
     // Execute transfer
     const tx = await signer.sendTransaction({
@@ -75,7 +75,7 @@ export const transferS = async ({
       gasLimit: gasEstimate
     });
     
-    console.log(`cBTC transfer transaction sent: ${tx.hash}`);
+    console.log(`CITREA transfer transaction sent: ${tx.hash}`);
     
     // Wait for confirmation
     const receipt = await tx.wait();
@@ -88,11 +88,11 @@ export const transferS = async ({
       throw new Error("Transaction failed");
     }
     
-    console.log(`✅ cBTC transfer completed successfully. Transaction hash: ${tx.hash}`);
+    console.log(`✅ CITREA transfer completed successfully. Transaction hash: ${tx.hash}`);
     return tx.hash;
     
   } catch (error: any) {
-    console.error("cBTC transfer failed:", error.message);
+    console.error("CITREA transfer failed:", error.message);
     
     // Handle specific error types
     if (error.code === 'INSUFFICIENT_FUNDS') {
@@ -102,11 +102,11 @@ export const transferS = async ({
     } else if (error.code === 'TIMEOUT') {
       throw new Error("Transfer transaction timed out");
     } else if (error.message.includes("insufficient funds")) {
-      throw new Error("Insufficient cBTC balance for transfer and gas fees");
+      throw new Error("Insufficient CITREA balance for transfer and gas fees");
     } else if (error.message.includes("gas")) {
       throw new Error("Gas estimation failed or gas limit exceeded");
     }
     
-    throw new Error(`cBTC transfer failed: ${error.message}`);
+    throw new Error(`CITREA transfer failed: ${error.message}`);
   }
 };

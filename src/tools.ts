@@ -33,8 +33,8 @@ const withPrivateKey = <T>(
 
 // Schema definitions
 const transferCITREASchema = z.object({
-  toAddress: z.string().describe('The wallet address to transfer cBTC to'),
-  amount: z.string().describe('The amount of cBTC to transfer'),
+  toAddress: z.string().describe('The wallet address to transfer CITREA to'),
+  amount: z.string().describe('The amount of CITREA to transfer'),
 });
 
 const transferErc20Schema = z.object({
@@ -49,7 +49,7 @@ const burnErc20Schema = z.object({
 });
 
 const getCITREABalanceSchema = z.object({
-  walletAddress: z.string().nullable().optional().describe('The wallet address to check cBTC balance (optional, uses agent wallet if not provided)'),
+  walletAddress: z.string().nullable().optional().describe('The wallet address to check CITREA balance (optional, uses agent wallet if not provided)'),
 });
 
 const getErc20BalanceSchema = z.object({
@@ -69,7 +69,7 @@ const deployContractSchema = z.object({
 export const createTools = (agent: CitreaAgentInterface) => [
   tool(withPrivateKey(transferCITREA, agent), {
     name: 'transfer_citrea',
-    description: 'Transfer cBTC  to another wallet',
+    description: 'Transfer CITREA (native Citrea token) to another wallet',
     schema: transferCITREASchema,
   }),
 

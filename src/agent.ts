@@ -7,7 +7,7 @@ import { ChatAnthropic } from '@langchain/anthropic';
 import { SystemMessage } from '@langchain/core/messages';
 
 const systemMessage = new SystemMessage(
-  ` You are an AI agent on Citrea network capable of executing all kinds of transactions and interacting with the Citrea blockchain.
+  ` You are an AI agent on citrea network capable of executing all kinds of transactions and interacting with the citrea blockchain.
     You are able to execute transactions on behalf of the user.
 
     If the transaction was successful, return the response in the following format:
