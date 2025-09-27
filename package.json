@@ -8,11 +8,24 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build"
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "node --loader ts-node/esm test/balance.test.ts"
   },
   "author": "",
   "license": "ISC",
-  "description": "An AI agent SDK for Citrea blockchain",
+  "description": "An AI agent SDK for citrea blockchain",
+ 
+  "keywords": [
+    "citrea",
+    "blockchain",
+    "ai",
+    "agent",
+    "cBTC",
+    "web3",
+    "sdk",
+    "crypto",
+    "erc20"
+  ],
   "dependencies": {
     "@langchain/anthropic": "^0.3.11",
     "@langchain/core": "^0.3.23",
